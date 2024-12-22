@@ -2,32 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Geo Triggered Media</title>
+  <title>Audio Tour Test</title>
 </head>
 <body>
-  <h1>Geo-Triggered Audio and Video Demo</h1>
-  
-  <!-- Display areas -->
-  <h2>Information</h2>
-  <p id="text-container">Text content will appear here once you're in proximity.</p>
-  
-  <img id="image-container" src="" alt="Location Image" style="max-width: 400px; display: block; margin: 20px 0;">
-  
-  <button id="start-button">Start Tour</button>
+  <h1>Audio Tour Test</h1>
+  <p id="intiial-text"> Welcome. Click button below to begin. </p>
+  <button id="start-button">Begin</button>
 
-  <audio id="audio-player" controls></audio>
-  <!--<video id="video-player" controls width="400"></video>-->
-  
-  <button id="playButton">Play Audio</button>
-  
-  <script>
-    document.getElementById('playButton').addEventListener('click', () => {
-      const audioPlayer = document.getElementById('audio-player');
-      audioPlayer.play().catch(err => {
-        console.error('Audio play error:', err);
-      });
-    });
-  </script>
+  <div id="poi-content" style="display: none;">
+    <p id="text-container">Text for poi.</p>
+    <audio id="audio-player" controls></audio>
+  </div>
 
   <script>
     var currentPoi;
@@ -36,9 +21,9 @@
     const pointsOfInterest = [
       {
         name: "test 1",
-        lat: 37.7790262,
-        lng: -122.419906,
-        radius: 10000000,  // in meters
+        lat: 38.003466,
+        lng: -84.503286,
+        radius: 3000,  // in meters
         audioPath: "audio/cafe-speaking.mp3",
         videoPath: "videos/old_city_gate.mp4",
         textContent: "Welcome to the Old City Gate. This site dates back to 1882...",
@@ -56,33 +41,7 @@
       }
     ];
 
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(function(location) {
-        console.log(location.coords.latitude);
-        console.log(location.coords.longitude);
-        console.log(location.coords.accuracy);
-        handleLocationUpdate(location.coords.latitude, location.coords.longitude);
-  });}
-
-    // 2. Geolocation watch
-    if ('geolocation' in navigator) {
-      navigator.geolocation.watchPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          handleLocationUpdate(latitude, longitude);
-        },
-        (error) => {
-          console.error('Error retrieving location:', error);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 5000
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-    }
+    
 
     // 3. Distance calculation using Haversine
     function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
@@ -129,12 +88,7 @@
       // Play audio
       const audioPlayer = document.getElementById('audio-player');
       audioPlayer.src = poi.audioPath;
-      //audioPlayer.play().catch(err => console.log('Audio play error:', err));
-      
-      // Play video
-      //const videoPlayer = document.getElementById('video-player');
-      //videoPlayer.src = poi.videoPath;
-      //videoPlayer.play().catch(err => console.log('Video play error:', err));
+      audioPlayer.play().catch(err => console.log('Audio play error:', err));
     }
 
     function hideContent() {
@@ -144,17 +98,32 @@
     }
 
     document.getElementById('start-button').addEventListener('click', () => {
-      const audioPlayer = document.getElementById('audio-player');
-      // Try playing the audio
-      audioPlayer.play()
-        .then(() => {
-          // If successful, audio is unlocked
-          audioUnlocked = true;
-          console.log('Audio unlocked!');
-        })
-        .catch(err => {
-          console.error('Failed to unlock audio:', err);
+      const secretContent = document.getElementById('poi-content');
+      secretContent.style.display = 'block';
+      audioUnlocked = true;
+      console.log('Start Clicked!');
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(function(location) {
+          console.log(location.coords.latitude);
+          console.log(location.coords.longitude);
+          console.log(location.coords.accuracy);
+          handleLocationUpdate(location.coords.latitude, location.coords.longitude);
         });
+
+        navigator.geolocation.watchPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          handleLocationUpdate(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error retrieving location:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000
+        });
+      }
     });
   </script>
 </body>
