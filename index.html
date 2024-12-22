@@ -23,7 +23,7 @@
         name: "test 1",
         lat: 37.7790262,
         lng: -122.419906,
-        radius: 100000,  // in meters
+        radius: 10000000,  // in meters
         audioPath: "audio/cafe-speaking.mp3",
         videoPath: "videos/old_city_gate.mp4",
         textContent: "Welcome to the Old City Gate. This site dates back to 1882...",
@@ -40,6 +40,14 @@
         imagePath: "images/town_square.jpg"
       }
     ];
+
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(function(location) {
+        console.log(location.coords.latitude);
+        console.log(location.coords.longitude);
+        console.log(location.coords.accuracy);
+        handleLocationUpdate(location.coords.latitude, location.coords.longitude);
+  });}
 
     // 2. Geolocation watch
     if ('geolocation' in navigator) {
@@ -82,6 +90,7 @@
     function handleLocationUpdate(userLat, userLng) {
       pointsOfInterest.forEach((poi) => {
         const distance = getDistanceFromLatLonInM(userLat, userLng, poi.lat, poi.lng);
+        console.log(distance);
         if (distance <= poi.radius) {
           showContent(poi);
         } else {
@@ -112,9 +121,6 @@
       // Stop or pause media if desired
       const audioPlayer = document.getElementById('audio-player');
       audioPlayer.pause();
-
-      const videoPlayer = document.getElementById('video-player');
-      videoPlayer.pause();
     }
   </script>
 </body>
