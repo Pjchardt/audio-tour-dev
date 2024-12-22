@@ -14,17 +14,17 @@
   <img id="image-container" src="" alt="Location Image" style="max-width: 400px; display: block; margin: 20px 0;">
   
   <audio id="audio-player" controls></audio>
-  <video id="video-player" controls width="400"></video>
+  <!--<video id="video-player" controls width="400"></video>-->
   
   <script>
     // 1. Define your points of interest
     const pointsOfInterest = [
       {
-        name: "Old City Gate",
+        name: "test 1",
         lat: 37.7790262,
         lng: -122.419906,
-        radius: 100,  // in meters
-        audioPath: "audio/old_city_gate.mp3",
+        radius: 100000,  // in meters
+        audioPath: "audio/cafe-speaking.mp3",
         videoPath: "videos/old_city_gate.mp4",
         textContent: "Welcome to the Old City Gate. This site dates back to 1882...",
         imagePath: "images/old_city_gate.jpg"
@@ -95,7 +95,7 @@
       document.getElementById('text-container').textContent = poi.textContent;
 
       // Show image
-      document.getElementById('image-container').src = poi.imagePath;
+      //document.getElementById('image-container').src = poi.imagePath;
 
       // Play audio
       const audioPlayer = document.getElementById('audio-player');
@@ -103,9 +103,9 @@
       audioPlayer.play().catch(err => console.log('Audio play error:', err));
       
       // Play video
-      const videoPlayer = document.getElementById('video-player');
-      videoPlayer.src = poi.videoPath;
-      videoPlayer.play().catch(err => console.log('Video play error:', err));
+      //const videoPlayer = document.getElementById('video-player');
+      //videoPlayer.src = poi.videoPath;
+      //videoPlayer.play().catch(err => console.log('Video play error:', err));
     }
 
     function hideContent() {
