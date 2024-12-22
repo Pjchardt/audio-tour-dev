@@ -17,6 +17,7 @@
   <!--<video id="video-player" controls width="400"></video>-->
   
   <script>
+    var currentPoi;
     // 1. Define your points of interest
     const pointsOfInterest = [
       {
@@ -92,7 +93,12 @@
         const distance = getDistanceFromLatLonInM(userLat, userLng, poi.lat, poi.lng);
         console.log(distance);
         if (distance <= poi.radius) {
+          
+          if (currentPoi != poi) {
           showContent(poi);
+          currentPoi = poi;
+        }
+          
         } else {
           hideContent();
         }
@@ -109,7 +115,7 @@
       // Play audio
       const audioPlayer = document.getElementById('audio-player');
       audioPlayer.src = poi.audioPath;
-      audioPlayer.play().catch(err => console.log('Audio play error:', err));
+      //audioPlayer.play().catch(err => console.log('Audio play error:', err));
       
       // Play video
       //const videoPlayer = document.getElementById('video-player');
