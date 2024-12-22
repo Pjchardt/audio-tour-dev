@@ -1,1 +1,121 @@
-hello wrold!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Geo Triggered Media</title>
+</head>
+<body>
+  <h1>Geo-Triggered Audio and Video Demo</h1>
+  
+  <!-- Display areas -->
+  <h2>Information</h2>
+  <p id="text-container">Text content will appear here once you're in proximity.</p>
+  
+  <img id="image-container" src="" alt="Location Image" style="max-width: 400px; display: block; margin: 20px 0;">
+  
+  <audio id="audio-player" controls></audio>
+  <video id="video-player" controls width="400"></video>
+  
+  <script>
+    // 1. Define your points of interest
+    const pointsOfInterest = [
+      {
+        name: "Old City Gate",
+        lat: 37.7790262,
+        lng: -122.419906,
+        radius: 100,  // in meters
+        audioPath: "audio/old_city_gate.mp3",
+        videoPath: "videos/old_city_gate.mp4",
+        textContent: "Welcome to the Old City Gate. This site dates back to 1882...",
+        imagePath: "images/old_city_gate.jpg"
+      },
+      {
+        name: "Town Square",
+        lat: 37.7794861,
+        lng: -122.4189544,
+        radius: 70,
+        audioPath: "audio/town_square.mp3",
+        videoPath: "videos/town_square.mp4",
+        textContent: "You've arrived at Town Square, the heart of the city...",
+        imagePath: "images/town_square.jpg"
+      }
+    ];
+
+    // 2. Geolocation watch
+    if ('geolocation' in navigator) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          handleLocationUpdate(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error retrieving location:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0,
+          timeout: 5000
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+
+    // 3. Distance calculation using Haversine
+    function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // radius of Earth in meters
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI / 180);
+    }
+
+    // 4. Check proximity and trigger content
+    function handleLocationUpdate(userLat, userLng) {
+      pointsOfInterest.forEach((poi) => {
+        const distance = getDistanceFromLatLonInM(userLat, userLng, poi.lat, poi.lng);
+        if (distance <= poi.radius) {
+          showContent(poi);
+        } else {
+          hideContent();
+        }
+      });
+    }
+
+    function showContent(poi) {
+      // Show text
+      document.getElementById('text-container').textContent = poi.textContent;
+
+      // Show image
+      document.getElementById('image-container').src = poi.imagePath;
+
+      // Play audio
+      const audioPlayer = document.getElementById('audio-player');
+      audioPlayer.src = poi.audioPath;
+      audioPlayer.play().catch(err => console.log('Audio play error:', err));
+      
+      // Play video
+      const videoPlayer = document.getElementById('video-player');
+      videoPlayer.src = poi.videoPath;
+      videoPlayer.play().catch(err => console.log('Video play error:', err));
+    }
+
+    function hideContent() {
+      // Stop or pause media if desired
+      const audioPlayer = document.getElementById('audio-player');
+      audioPlayer.pause();
+
+      const videoPlayer = document.getElementById('video-player');
+      videoPlayer.pause();
+    }
+  </script>
+</body>
+</html>
