@@ -2,129 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Audio Tour Test</title>
+  <title>Multiple POIs (Y-up Example)</title>
+  <!-- Howler.js from CDN -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
+  ></script>
 </head>
 <body>
-  <h1>Audio Tour Test</h1>
-  <p id="intiial-text"> Welcome. Click button below to begin. </p>
+  <h1>Multiple Active POIs with Y-up Coordinates</h1>
+  <p>Click "Begin" to enable geolocation. Use arrow keys to move the 3D listener around (for testing the spatial effect).</p>
+
   <button id="start-button">Begin</button>
 
-  <div id="poi-content" style="display: none;">
-    <p id="text-container">Text for poi.</p>
-    <audio id="audio-player" controls></audio>
+  <h3>User Coordinates:</h3>
+  <p id="userCoords">lat=?, lng=?, alt=?</p>
+
+  <h3>Active POIs:</h3>
+  <ul id="active-pois-list"></ul>
+
+  <div style="margin-top: 20px;">
+    <p>Listener Position: <span id="listenerPos">x=0, y=0, z=0</span></p>
   </div>
 
-  <script>
-    var currentPoi;
-    let audioUnlocked = false;
-    // 1. Define your points of interest
-    const pointsOfInterest = [
-      {
-        name: "test 1",
-        lat: 38.003466,
-        lng: -84.503286,
-        radius: 3000,  // in meters
-        audioPath: "audio/cafe-speaking.mp3",
-        videoPath: "videos/old_city_gate.mp4",
-        textContent: "Welcome to the Old City Gate. This site dates back to 1882...",
-        imagePath: "images/old_city_gate.jpg"
-      },
-      {
-        name: "Town Square",
-        lat: 37.7794861,
-        lng: -122.4189544,
-        radius: 70,
-        audioPath: "audio/town_square.mp3",
-        videoPath: "videos/town_square.mp4",
-        textContent: "You've arrived at Town Square, the heart of the city...",
-        imagePath: "images/town_square.jpg"
-      }
-    ];
-
-    
-
-    // 3. Distance calculation using Haversine
-    function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // radius of Earth in meters
-      const dLat = deg2rad(lat2 - lat1);
-      const dLon = deg2rad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    function deg2rad(deg) {
-      return deg * (Math.PI / 180);
-    }
-
-    // 4. Check proximity and trigger content
-    function handleLocationUpdate(userLat, userLng) {
-      pointsOfInterest.forEach((poi) => {
-        const distance = getDistanceFromLatLonInM(userLat, userLng, poi.lat, poi.lng);
-        console.log(distance);
-        if (distance <= poi.radius) {
-          //if (audioUnlocked) {
-            if (currentPoi !== poi) {
-              showContent(poi);
-              currentPoi = poi;
-            }
-          //}  
-        } else {
-          hideContent();
-        }
-      });
-    }
-
-    function showContent(poi) {
-      // Show text
-      document.getElementById('text-container').textContent = poi.textContent;
-
-      // Show image
-      //document.getElementById('image-container').src = poi.imagePath;
-
-      // Play audio
-      const audioPlayer = document.getElementById('audio-player');
-      audioPlayer.src = poi.audioPath;
-      audioPlayer.play().catch(err => console.log('Audio play error:', err));
-    }
-
-    function hideContent() {
-      // Stop or pause media if desired
-      //const audioPlayer = document.getElementById('audio-player');
-      //audioPlayer.pause();
-    }
-
-    document.getElementById('start-button').addEventListener('click', () => {
-      const secretContent = document.getElementById('poi-content');
-      secretContent.style.display = 'block';
-      audioUnlocked = true;
-      console.log('Start Clicked!');
-
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(function(location) {
-          console.log(location.coords.latitude);
-          console.log(location.coords.longitude);
-          console.log(location.coords.accuracy);
-          handleLocationUpdate(location.coords.latitude, location.coords.longitude);
-        });
-
-        navigator.geolocation.watchPosition((position) => {
-          const { latitude, longitude } = position.coords;
-          handleLocationUpdate(latitude, longitude);
-        },
-        (error) => {
-          console.error('Error retrieving location:', error);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 0,
-          timeout: 5000
-        });
-      }
-    });
-  </script>
+  <!-- 1) POI data -->
+  <script src="poi-data.js"></script>
+  <!-- 2) Geo location + local coords (Y-up) -->
+  <script src="location.js"></script>
+  <!-- 3) Audio manager (Howler setup) -->
+  <script src="audio-manager.js"></script>
+  <!-- 4) Main logic (activations, arrow keys, etc.) -->
+  <script src="main.js"></script>
 </body>
 </html>
