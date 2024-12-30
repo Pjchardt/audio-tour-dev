@@ -7,7 +7,7 @@ function createSpatialSound(audioPath, onReady) {
       src: [audioPath],
       loop: true,
       volume: 1.0,
-      html5: false, 
+      //html5: false, 
       pannerAttr: {
         panningModel: 'HRTF',
         distanceModel: 'exponential',
