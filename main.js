@@ -12,6 +12,7 @@
         refDistance: 1,
         maxDistance: 100,
         rolloffFactor: 1,
+      }
     });
 
     // Real GPS data (updated by geolocation)
@@ -54,7 +55,7 @@
       sound.play();
       
       window.pointsOfInterest.forEach((poi) => {
-      activatePoi(latUser, lngUser, altUser, poi);
+      activatePoi(poi.lat, poi.lng, poi.altitude, poi);
       });
       updateActivePoiList();
 
