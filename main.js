@@ -34,6 +34,11 @@
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
   
+      window.pointsOfInterest.forEach((poi) => {
+      activatePoi(latUser, lngUser, altUser, poi);
+      });
+      updateActivePoiList();
+
       if ('geolocation' in navigator) {
         // Get one initial position
         navigator.geolocation.getCurrentPosition(
