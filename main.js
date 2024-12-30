@@ -6,11 +6,9 @@
       src: ['audio/bird-1.mp3'], // Replace with your actual audio URL
       volume: 1.0,
       loop: true,
-      volume: 1.0,
-      html5: false, 
       pannerAttr: {
         panningModel: 'HRTF',
-        distanceModel: 'exponential',
+        distanceModel: 'linear',
         refDistance: 1,
         maxDistance: 100,
         rolloffFactor: 1,
