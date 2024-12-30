@@ -11,7 +11,7 @@ function createSpatialSound(audioPath, onReady) {
         panningModel: 'HRTF',
         distanceModel: 'linear',
         refDistance: 1,
-        maxDistance: 1000,
+        maxDistance: 100,
         rolloffFactor: 1
       },
       onload: onReady,

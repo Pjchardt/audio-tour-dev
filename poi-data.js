@@ -2,6 +2,30 @@
 // Holds pointsOfInterest array and any data definitions
 const pointsOfInterest = [
     {
+      name: "Test 1",
+      lat: 38.002783,
+      lng: -84.502493,
+      radius: 100,
+      audioPath: "audio/bird-1.mp3",
+      textContent: "This is a test location. Here is a variable to save text content.",
+    },
+    {
+      name: "Test 2",
+      lat: 38.002947,
+      lng: -84.502870,
+      radius: 100,
+      audioPath: "audio/cafe-speaking.mp3",
+      textContent: "This is a test location. Here is a variable to save text content.",
+    },
+    {
+      name: "Test 3",
+      lat: 38.003136,
+      lng: -84.503369,
+      radius: 100,
+      audioPath: "audio/christmas-sounds.mp3",
+      textContent: "This is a test location. Here is a variable to save text content.",
+    },
+    /*{
       name: "701 Sherwood Drive",
       lat: 38.003132968634944,
       lng: -84.50344141802317,
@@ -32,7 +56,7 @@ const pointsOfInterest = [
         radius: 500,
         audioPath: "audio/christmas-sounds.mp3",
         textContent: "You've arrived at Town Square, the heart of the city...",
-    },
+    },*/
     // ... more POIs ...
   ];
   
