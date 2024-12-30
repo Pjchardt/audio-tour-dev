@@ -2,6 +2,20 @@
 (function () {
     // 1) Global/state variables
   
+    const sound = new Howl({
+      src: ['audio/bird-1.mp3'], // Replace with your actual audio URL
+      volume: 1.0,
+      loop: true,
+      volume: 1.0,
+      html5: false, 
+      pannerAttr: {
+        panningModel: 'HRTF',
+        distanceModel: 'exponential',
+        refDistance: 1,
+        maxDistance: 100,
+        rolloffFactor: 1,
+    });
+
     // Real GPS data (updated by geolocation)
     let baseLat = 0;   // fallback defaults
     let baseLng = 0;
@@ -34,6 +48,13 @@
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
   
+      sound.pos(x, y, z);
+  
+      // The user is at (0,0,0)
+      Howler.pos(0, 0, 0);
+  
+      sound.play();
+      
       window.pointsOfInterest.forEach((poi) => {
       activatePoi(latUser, lngUser, altUser, poi);
       });
