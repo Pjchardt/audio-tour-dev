@@ -48,7 +48,7 @@
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
   
-      sound.pos(x, y, z);
+      sound.pos(0, 0, 10);
   
       // The user is at (0,0,0)
       Howler.pos(0, 0, 0);
