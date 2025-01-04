@@ -31,8 +31,8 @@ Game.prototype = {
     var ms = time - this.lastTime;
     this.lastTime = time;
 
-    let x = Math.sin(time * .0001)*20;
-    let z = Math.cos(time * .0001)*20;
+    let x = Math.sin(time * .0005)*50+50;
+    let z = 0;//Math.cos(time * .0001)*20;
     Howler.pos(x, 0, z);
     let userPosition = document.getElementById('listenerPos');
     if (userPosition) {
