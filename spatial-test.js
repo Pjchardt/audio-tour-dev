@@ -11,12 +11,20 @@ var Game = function() {
   this.lastTime = 0;
 
   // Setup our different game components.
-  this.howlInstance = window.createSpatialSound("audio/bird-1.mp3");
+  this.howlInstance = window.createSpatialSound("audio/tv-static.mp3");
   this.howlInstance.on('load', () => {
           console.log(`Spatial sound loaded`);
-            });
+    });
+            
   this.howlInstance.pos(0, 0, 0);
-    // The user is at (0,0,0)
+  this.howlInstance.pannerAttr({
+    panningModel: 'HRTF',
+    refDistance: 0.8,
+    rolloffFactor: 2.5,
+    distanceModel: 'exponential'
+  }, this.howlInstance);  
+  
+  // The user is at (0,0,0)
    Howler.pos(0, 0, 0);
    this.howlInstance.play();
   
@@ -31,7 +39,7 @@ Game.prototype = {
     var ms = time - this.lastTime;
     this.lastTime = time;
 
-    let x = Math.sin(time * .0005)*50+50;
+    let x = Math.sin(time * .0001)*75+75;
     let z = 0;//Math.cos(time * .0001)*20;
     Howler.pos(x, 0, z);
     let userPosition = document.getElementById('listenerPos');
