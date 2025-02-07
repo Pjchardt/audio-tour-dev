@@ -14,7 +14,7 @@
     // For multiple POIs: activePoiMap = { [poi.name]: { poi, howlInstance } }
     let activePoiMap = {};
     let audioUnlocked = false;
-  
+
     var ctx;
 
     // 2) Initialization
@@ -65,9 +65,6 @@
     function onBeginClick() {
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
-  
-      // The user is at (0,0,0)
-      Howler.pos(0, 0, 0);
 
       window.pointsOfInterest.forEach((poi) => {
       activatePoi(poi.lat, poi.lng, poi.altitude, poi);
@@ -152,7 +149,7 @@
       );
   
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
-      handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
+      //handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
 
       // Convert to XY and then to screen coordinates
       const local = window.latLonToXY(effectiveLat, effectiveLng);
@@ -161,6 +158,9 @@
       ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
       ctx.fillStyle = 'purple';
       ctx.fill();
+
+      // The user is at (0,0,0)
+      Howler.pos(local.x, 0, local.y);
     }
   
     // 6) Activate/Deactivate POIs
@@ -177,23 +177,7 @@
     }
   
     function activatePoi(latUser, lngUser, altUser, poi) {
-      if (activePoiMap[poi.name]) {
-        // Already active => just update position
-        const { howlInstance } = activePoiMap[poi.name];
-        if (howlInstance) {
-          const { x, y, z } = window.localCoordsYUp(
-            latUser,
-            lngUser,
-            altUser,
-            poi.lat,
-            poi.lng,
-            poi.altitude
-          );
-          howlInstance.pos(x, y, z);
-        }
-        return;
-      }
-  
+      
       console.log(`Activating POI: ${poi.name}`);
       let howlInstance = null;
   
@@ -201,7 +185,7 @@
         howlInstance = window.createSpatialSound(poi.audioPath);
         howlInstance.on('load', () => {
           console.log(`Loaded sound for ${poi.name}`);
-          const { x, y, z } = window.localCoordsYUp(
+          /*const { x, y, z } = window.localCoordsYUp(
             latUser,
             lngUser,
             altUser,
@@ -209,11 +193,10 @@
             poi.lng,
             poi.altitude
           );
-          howlInstance.pos(x, y, z);
+          howlInstance.pos(x, y, z);*/
   
-          // The user is at (0,0,0)
-          Howler.pos(0, 0, 0);
-  
+          const local = window.latLonToXY(poi.lat, poi.lng);
+          howlInstance.pos(local.x, 0, local.y);
           howlInstance.play();
         });
       }
