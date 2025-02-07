@@ -1,20 +1,6 @@
 // main.js
 (function () {
     // 1) Global/state variables
-  
-    const sound = new Howl({
-      src: ['audio/bird-1.mp3'], // Replace with your actual audio URL
-      volume: 1.0,
-      loop: true,
-      pannerAttr: {
-        panningModel: 'HRTF',
-        distanceModel: 'linear',
-        refDistance: 1,
-        maxDistance: 100,
-        rolloffFactor: 1,
-      }
-    });
-
     // Real GPS data (updated by geolocation)
     let baseLat = 0;   // fallback defaults
     let baseLng = 0;
@@ -29,6 +15,8 @@
     let activePoiMap = {};
     let audioUnlocked = false;
   
+    var ctx;
+
     // 2) Initialization
     function init() {
       document
@@ -40,6 +28,37 @@
   
       // Update the UI initially
       updateLatLngDisplay();
+
+      // Grab canvas
+      const canvas = document.getElementById('myMap');
+      ctx = canvas.getContext('2d');
+
+      // Set the fill color
+      ctx.fillStyle = 'lightblue'; // You can change this to any color you like
+      // Fill the entire canvas with the color
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 70;
+
+      // Draw our anchor point
+      ctx.beginPath();
+      const local = window.latLonToXY(window.lat0, window.lon0);
+      const screen = window.projectToScreen(local.x, local.y);
+      ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = 'blue';
+      ctx.fill();
+
+      // Convert to XY and then to screen coordinates
+      window.pointsOfInterest.forEach((poi) => {
+        const local = window.latLonToXY(poi.lat, poi.lng);
+        const screen = window.projectToScreen(local.x, local.y);
+        ctx.beginPath();
+        ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+      });
     }
   
     // 3) Begin + Real Geolocation
@@ -47,13 +66,9 @@
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
   
-      sound.pos(0, 0, 10);
-  
       // The user is at (0,0,0)
       Howler.pos(0, 0, 0);
-  
-      sound.play();
-      
+
       window.pointsOfInterest.forEach((poi) => {
       activatePoi(poi.lat, poi.lng, poi.altitude, poi);
       });
@@ -138,6 +153,14 @@
   
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
       handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
+
+      // Convert to XY and then to screen coordinates
+      const local = window.latLonToXY(effectiveLat, effectiveLng);
+      const screen = window.projectToScreen(local.x, local.y);
+      ctx.beginPath();
+      ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = 'purple';
+      ctx.fill();
     }
   
     // 6) Activate/Deactivate POIs

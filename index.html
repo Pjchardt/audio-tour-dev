@@ -13,6 +13,7 @@
   </script>
 </head>
 <body>
+  <canvas id="myMap" width="600" height="600"></canvas>
   <h1>Multiple Active POIs with Y-up Coordinates</h1>
   <p>Click "Begin" to enable geolocation. Use arrow keys to move the 3D listener around (for testing the spatial effect).</p>
 
@@ -29,6 +30,7 @@
   </div>
 
   <!-- 1) POI data -->
+  <script src="gps-to-plane.js"></script>
   <script src="poi-data.js"></script>
   <!-- 2) Geo location + local coords (Y-up) -->
   <script src="location.js"></script>
