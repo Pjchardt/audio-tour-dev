@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Multiple POIs (Y-up Example)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
   <!-- Howler.js from CDN -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
@@ -13,20 +16,46 @@
   </script>
 </head>
 <body>
-  <canvas id="myMap" width="600" height="600"></canvas>
-  <h1>Multiple Active POIs with Y-up Coordinates</h1>
-  <p>Click "Begin" to enable geolocation. Use arrow keys to move the 3D listener around (for testing the spatial effect).</p>
+  <div id="header">
+    <h1>Project Title</h1>
+    <button id="infoButton" class="info-button" aria-label="Information">
+      <i class="fa-solid fa-info"></i>
+    </button>
+  </div>
 
-  <button id="start-button">Begin</button>
+  <!-- Modal (hidden by default) -->
+  <div id="infoModal" class="modal">
+    <div class="modal-content">
+      <h2>Information Title</h2>
+      <p>This is some information about the project, how to use it, etc.</p>
+      <button id="closeModalButton" class="close-button">Close</button>
+    </div>
+  </div>
 
-  <h3>User Coordinates:</h3>
-  <p id="userCoords">lat=?, lng=?, alt=?</p>
+  <div id="map">
+    <canvas id="myMap" width="1280" height="720"></canvas>
+  </div>
+  
+  <div id="poi-info">
+    <h3 id="poi-title">POI Title:</h3>
+    <img id="poi-image" src="images/test-1.jpg" alt="Point of Interest" width="300px" height="auto" />
+    <p id="poi-text">lat=?, lng=?, alt=?</p>
+    <p id="userCoords">lat=?, lng=?, alt=?</p>
+  </div>
+  
+  <div id="footer">
+    <h3>Active POIs:</h3>
+    <ul id="active-pois-list"></ul>
+  </div>
 
-  <h3>Active POIs:</h3>
-  <ul id="active-pois-list"></ul>
-
-  <div style="margin-top: 20px;">
-    <p>Listener Position: <span id="listenerPos">x=0, y=0, z=0</span></p>
+  <!-- The overlay container - visible on page load -->
+  <div id="overlay" class="overlay">
+    <!-- The content inside the overlay -->
+    <div class="overlay-content">
+      <h1>Title</h1>
+      <p>Info about the experience.</p>
+      <button id="start-experience"><i class="fa-solid fa-play"></i></i></button>
+    </div>
   </div>
 
   <!-- 1) POI data -->

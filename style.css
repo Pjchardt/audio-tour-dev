@@ -1,0 +1,138 @@
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;         /* Old fallback */
+    height: 100dvh;        /* Dynamic viewport height for browsers that support it */
+  }
+
+  /* HEADER STYLES */
+#header {
+  display: flex;
+  justify-content: space-between; /* Title on the left, button on the right */
+  align-items: center;
+  background-color: #f1f1f1; /* or any color you like */
+  padding: 10px 20px;
+}
+
+/* Info button style */
+.info-button {
+  background-color: #fff;
+  border: 2px solid #aaa;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+
+  /* Use flex to center the icon inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Optional: small transition on hover */
+  transition: background-color 0.2s;
+}
+.info-button:hover {
+  background-color: #eee;
+}
+
+/* Optional: style the icon color and size */
+.info-button i {
+  color: #333;
+  font-size: 18px;
+}
+
+/* MODAL OVERLAY STYLES */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* Overlay background */
+  background-color: rgba(0, 0, 0, 0.5);
+  
+  display: none; /* hidden by default */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex; /* show the modal when .show is added via JS */
+}
+
+/* MODAL CONTENT BOX */
+.modal-content {
+  background-color: #fff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%; /* make it responsive */
+  box-sizing: border-box;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+/* Close button inside modal */
+.close-button {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background: #ccc;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.close-button:hover {
+  background: #bbb;
+}
+
+  canvas {
+    width: 100%;
+    display: block;
+  }
+
+  #header {
+    background-color:gray;
+    height: 8%;
+    margin-bottom: 2%;
+  }
+
+  #map {
+    background-color:gray;
+    margin-bottom: 2%;
+  }
+
+  #poi-info {
+    background-color:gray;
+    height: 40%;
+    margin-bottom: 2%;
+  }
+
+  #start-experience {
+    font-size: 4em;
+  }
+
+  /* Overlay - initially visible on page load */
+.overlay {
+  position: fixed;           /* Stay in place while scrolling */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;             /* Visible on page load, using flex to center content */
+  justify-content: center;   
+  align-items: center;       
+  background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+}
+
+/* Overlay content box styling */
+.overlay-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  height: 80%;
+  text-align: center;
+}

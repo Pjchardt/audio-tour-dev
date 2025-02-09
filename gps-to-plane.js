@@ -27,11 +27,11 @@ function latLonToXY(lat, lon/*, lat0, lon0*/) {
 }
 
 // Suppose you want each meter to be 0.02px (just an example).
-const METERS_TO_PIXELS = 0.2;//4.0;
+const METERS_TO_PIXELS = 4.0;
 
 // Offset so the reference point appears in the middle of a <div> or canvas
-const offsetX = 300;  // center x on screen
-const offsetY = 300;  // center y on screen
+const offsetX = 1280/2;  // center x on screen
+const offsetY = 720/2;  // center y on screen
 
 function projectToScreen(x, y) {
   const screenX = x * METERS_TO_PIXELS + offsetX;

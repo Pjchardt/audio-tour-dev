@@ -19,13 +19,34 @@
 
     // 2) Initialization
     function init() {
-      document
-        .getElementById('start-button')
-        .addEventListener('click', onBeginClick);
-  
+      document.getElementById('start-experience').addEventListener('click', onBeginClick);
+
       // Listen for arrow keys to adjust offset, not the base lat/lng
       document.addEventListener('keydown', onArrowKeyPress);
   
+      // Get references to elements
+      const infoButton = document.getElementById('infoButton');
+      const infoModal = document.getElementById('infoModal');
+      const closeModalButton = document.getElementById('closeModalButton');
+
+      // SHOW the modal when the info button is clicked
+      infoButton.addEventListener('click', () => {
+        infoModal.classList.add('show');
+      });
+
+      // HIDE the modal when the close button is clicked
+      closeModalButton.addEventListener('click', () => {
+        infoModal.classList.remove('show');
+      });
+
+      // (Optional) Hide modal when clicking outside the .modal-content
+      infoModal.addEventListener('click', (event) => {
+        if (event.target === infoModal) {
+          infoModal.classList.remove('show');
+        }
+      });
+
+
       // Update the UI initially
       updateLatLngDisplay();
 
@@ -50,14 +71,17 @@
       ctx.fillStyle = 'blue';
       ctx.fill();
 
+      // Optional: set stroke style (color and line width)
+      ctx.strokeStyle = 'white';      // outline color
+      ctx.lineWidth = 5;            // thickness of outline
+
       // Convert to XY and then to screen coordinates
       window.pointsOfInterest.forEach((poi) => {
         const local = window.latLonToXY(poi.lat, poi.lng);
         const screen = window.projectToScreen(local.x, local.y);
         ctx.beginPath();
-        ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
-        ctx.fillStyle = 'red';
-        ctx.fill();
+        ctx.arc(screen.screenX, screen.screenY, 20, 0, 2 * Math.PI);
+        ctx.stroke();
       });
     }
   
@@ -65,6 +89,8 @@
     function onBeginClick() {
       audioUnlocked = true;
       console.log('Begin clicked; audio unlocked');
+
+      document.getElementById('overlay').style.display = 'none';
 
       window.pointsOfInterest.forEach((poi) => {
       activatePoi(poi.lat, poi.lng, poi.altitude, poi);
@@ -132,6 +158,11 @@
           // Move east => increment offsetLng
           offsetLng += step;
           break;
+          case 'p':
+            // Set offset so that lat/long matches anchor position
+            offsetLat = lat0 - baseLat;
+            offsetLng = lon0 - baseLng;
+            break;
         default:
           return;
       }
@@ -149,7 +180,7 @@
       );
   
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
-      //handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
+      handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
 
       // Convert to XY and then to screen coordinates
       const local = window.latLonToXY(effectiveLat, effectiveLng);
@@ -159,7 +190,6 @@
       ctx.fillStyle = 'purple';
       ctx.fill();
 
-      // The user is at (0,0,0)
       Howler.pos(local.x, 0, local.y);
     }
   
@@ -233,15 +263,30 @@
         const listElem = document.getElementById('active-pois-list');
         listElem.innerHTML = '';
       
+        // Let's assume these are your HTML elements:
+        const poiTitleElem = document.getElementById('poi-title');
+        const poiImageElem = document.getElementById('poi-image');
+        const poiTextElem = document.getElementById('poi-text');
+
+        // Track the closest POI
+        let closestPoi = null;
+        let minDist = Infinity;
+
         // For each active POI, create an <li> element
         Object.keys(activePoiMap).forEach((poiName) => {
           const { poi } = activePoiMap[poiName];
       
-        // 1) Compute distance from user to this POI:
-        const effectiveLat = baseLat + offsetLat;
-        const effectiveLng = baseLng + offsetLng;
-        const effectiveAlt = baseAlt + offsetAlt; // if you use altitude offsets
-        const distance = haversineDistance(effectiveLat, effectiveLng, poi.lat, poi.lng);
+          // 1) Compute distance from user to this POI:
+          const effectiveLat = baseLat + offsetLat;
+          const effectiveLng = baseLng + offsetLng;
+          const effectiveAlt = baseAlt + offsetAlt; // if you use altitude offsets
+          const distance = haversineDistance(effectiveLat, effectiveLng, poi.lat, poi.lng);
+
+          // -- Update the closest POI logic --
+          if (distance < minDist) {
+            minDist = distance;
+            closestPoi = poi; // store the entire POI object
+          }
 
           // Create a list item
           const li = document.createElement('li');
@@ -255,6 +300,13 @@
       
           listElem.appendChild(li);
         });
+
+        // After iterating through all POIs, use the closest one
+        if (closestPoi) {
+          poiTitleElem.textContent = `POI Title: ${closestPoi.name}`;
+          poiImageElem.src = closestPoi.imagePath;
+          poiTextElem.textContent = closestPoi.textContent;
+        }
       }
   
     // 8) Start

@@ -7,6 +7,7 @@ const pointsOfInterest = [
       lng: -84.500100,
       radius: 50,
       audioPath: "audio/piano.mp3",
+      imagePath: "images/image-1.jpg",
       textContent: "Point 1 (intersection of Main and Broadway).",
     },
     {
@@ -15,6 +16,7 @@ const pointsOfInterest = [
       lng: -84.500829,
       radius: 50,
       audioPath: "audio/guitar.mp3",
+      imagePath: "images/image-2.jpg",
       textContent: "Point 2 (near taco spot).",
     },
     {
@@ -23,6 +25,7 @@ const pointsOfInterest = [
       lng: -84.500916,
       radius: 100,
       audioPath: "audio/violin.mp3",
+      imagePath: "images/image-3.jpg",
       textContent: "Point 3 (next to plaque along fountain steps).",
     },
     {
@@ -31,6 +34,7 @@ const pointsOfInterest = [
       lng: -84.500737,
       radius: 500,
       audioPath: "audio/clarinet.mp3",
+      imagePath: "images/image-4.jpg",
       textContent: "Point 4. (intersection of Vine and Broadway)",
     },
    /* {
