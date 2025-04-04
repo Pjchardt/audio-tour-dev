@@ -2,25 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Multiple POIs (Y-up Example)</title>
+  <title>Lexington History Museum Walking Audio Experience</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <!-- Howler.js from CDN -->
   <script
     src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
   ></script>
   <script>
-    // Immediately after Howler is available:
     Howler.mobileAutoEnable = true;
   </script>
 </head>
+
 <body>
-  <div id="header">
-    <h1>Project Title</h1>
-    <button id="infoButton" class="info-button" aria-label="Information">
-      <i class="fa-solid fa-info"></i>
-    </button>
+  <div class="page-container">
+    
+    <header class="header">
+        <h1>Sonic Walk</h1>
+        <button id="infoButton" class="info-button" aria-label="Information">
+          <i class="fa-solid fa-info"></i>
+        </button>
+    </header>
+
+    <main class="content">
+      <div id="map">
+        <canvas id="myMap" width="1280" height="720"></canvas>
+        <div class="map-caption">
+          <p>Walk through Triangle Park to hear Lexington's past.</p>
+        </div>
+      </div>
+    
+      <div class="poi-info">
+        <h3 id="poi-title">No Active Point of Interest</h3>
+        <img id="poi-image" src="images/test-1.jpg" alt="Point of Interest" width="300px" height="auto" />
+        <p id="poi-text">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sagittis ac orci sit amet sagittis. 
+          Maecenas cursus, sem at volutpat finibus, magna dui cursus velit, in pharetra turpis tellus ac nunc. 
+          Curabitur sit amet tortor sodales, tincidunt lectus id, sodales ante. Maecenas ligula arcu, aliquet 
+          eget nulla sit amet, mollis feugiat quam. Mauris ullamcorper ipsum ac orci lacinia aliquet. 
+        </p>
+        <div class="debug">
+          <p id="userCoords">lat=?, lng=?, alt=?</p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+        <p> 
+          Some info about the project.
+          <br> Maybe a link to History Museum?
+        </p>
+        <div class="debug">
+          <h3>Active POIs:</h3>
+          <ul id="active-pois-list"></ul>
+        </div>
+    </footer>
   </div>
 
   <!-- Modal (hidden by default) -->
@@ -32,41 +72,59 @@
     </div>
   </div>
 
-  <div id="map">
-    <canvas id="myMap" width="1280" height="720"></canvas>
-  </div>
-  
-  <div id="poi-info">
-    <h3 id="poi-title">POI Title:</h3>
-    <img id="poi-image" src="images/test-1.jpg" alt="Point of Interest" width="300px" height="auto" />
-    <p id="poi-text">lat=?, lng=?, alt=?</p>
-    <p id="userCoords">lat=?, lng=?, alt=?</p>
-  </div>
-  
-  <div id="footer">
-    <h3>Active POIs:</h3>
-    <ul id="active-pois-list"></ul>
-  </div>
-
   <!-- The overlay container - visible on page load -->
-  <div id="overlay" class="overlay">
+  <div id="overlay-title" class="overlay">
     <!-- The content inside the overlay -->
     <div class="overlay-content">
-      <h1>Title</h1>
-      <p>Info about the experience.</p>
-      <button id="start-experience"><i class="fa-solid fa-play"></i></i></button>
+      <h1>Lexington History Museum Sonic Walk</h1>
+      <p>
+        Welcome to the Lexington History Museums's Sonic Walk at Triangle Park. 
+        Walk about the park to be immersed in the sounds of Lexington's history! 
+        Add more information here.Info about the experience.
+      </p>
+      <button id="start-experience-btn"><i class="fa-solid fa-play"></i></i></button>
+      <p>
+        Here is more info. Maybe abotu the project? A photo of the Hisotry museum and address?
+      </p>
     </div>
   </div>
 
-  <!-- 1) POI data -->
-  <script src="gps-to-plane.js"></script>
-  <script src="poi-data.js"></script>
-  <!-- 2) Geo location + local coords (Y-up) -->
-  <script src="location.js"></script>
-  <!-- 3) Audio manager (Howler setup) -->
-  <script src="audio-manager.js"></script>
-  <!--<script src="spatial-test.js"></script>-->
-  <!-- 4) Main logic (activations, arrow keys, etc.) -->
-  <script src="main.js"></script>
+      <!-- The overlay container - visible on page load -->
+      <div id="overlay-gps-info" class="overlay" style="display:none;">
+        <!-- The content inside the overlay -->
+        <div class="overlay-content">
+          <h1>Sonic Walk</h1>
+          <i class="fa-solid fa-map-location-dot"></i>
+          <p>
+            This experience uses your GPS location to produce a sonic environment. 
+            Please enable location services on your devices and allow the website to access GPS.
+          </p>
+          <button id="gps-continue-btn"><i class="fa-solid fa-play"></i></i></button>
+        </div>
+      </div>
+
+      <!-- The overlay container - visible on page load -->
+      <div id="overlay-headphones-info" class="overlay" style="display:none;">
+        <!-- The content inside the overlay -->
+        <div class="overlay-content">
+          <h1>Sonic Walk</h1>
+          <i class="fa-solid fa-headphones"></i>
+          <p>
+            This sonic walk is best expereinced with headphones.
+          </p>
+          <button id="headphones-continue-btn"><i class="fa-solid fa-play"></i></i></button>
+        </div>
+      </div>
+
+    <!-- 1) POI data -->
+    <script src="gps-to-plane.js"></script>
+    <script src="poi-data.js"></script>
+    <!-- 2) Geo location + local coords (Y-up) -->
+    <script src="location.js"></script>
+    <!-- 3) Audio manager (Howler setup) -->
+    <script src="audio-manager.js"></script>
+    <!--<script src="spatial-test.js"></script>-->
+    <!-- 4) Main logic (activations, arrow keys, etc.) -->
+    <script src="main.js"></script>
 </body>
 </html>

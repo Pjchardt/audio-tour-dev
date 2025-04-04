@@ -19,7 +19,9 @@
 
     // 2) Initialization
     function init() {
-      document.getElementById('start-experience').addEventListener('click', onBeginClick);
+      document.getElementById('start-experience-btn').addEventListener('click', onStartBtnClick);
+      document.getElementById('gps-continue-btn').addEventListener('click', onGPSBtnClick);
+      document.getElementById('headphones-continue-btn').addEventListener('click', onHeadphonesBtnClick);
 
       // Listen for arrow keys to adjust offset, not the base lat/lng
       document.addEventListener('keydown', onArrowKeyPress);
@@ -55,7 +57,7 @@
       ctx = canvas.getContext('2d');
 
       // Set the fill color
-      ctx.fillStyle = 'lightblue'; // You can change this to any color you like
+      ctx.fillStyle = '#323232';
       // Fill the entire canvas with the color
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -72,70 +74,154 @@
       ctx.fill();
 
       // Optional: set stroke style (color and line width)
-      ctx.strokeStyle = 'white';      // outline color
+      ctx.strokeStyle = 'rgb(200, 200, 200)';      // outline color
       ctx.lineWidth = 5;            // thickness of outline
+
+      // Example dash pattern (4px dash, 2px gap, etc.)
+      ctx.setLineDash([20, 20]);
 
       // Convert to XY and then to screen coordinates
       window.pointsOfInterest.forEach((poi) => {
         const local = window.latLonToXY(poi.lat, poi.lng);
         const screen = window.projectToScreen(local.x, local.y);
         ctx.beginPath();
-        ctx.arc(screen.screenX, screen.screenY, 20, 0, 2 * Math.PI);
+        ctx.arc(screen.screenX, screen.screenY, 50, 0, 2 * Math.PI);
         ctx.stroke();
       });
+
+      ctx.setLineDash([]);  // empty array = no dash
+      ctx.restore(); // back to normal
+
+      // We'll store "rings" in an array
+      let rings = [];
+
+      // How long (in seconds) each ring lasts
+      const RING_DURATION = 1.0;
+
+      // Every second, spawn a new ring at each point of interest
+      setInterval(() => {
+        window.pointsOfInterest.forEach((poi) => {
+          const local = window.latLonToXY(poi.lat, poi.lng);
+          const screen = window.projectToScreen(local.x, local.y);
+
+          rings.push({
+            x: screen.screenX,
+            y: screen.screenY,
+            startTime: performance.now(),
+          });
+        });
+      }, 1000);
+
+      // Main animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1) Draw the dotted circles (your existing code)
+        ctx.setLineDash([4, 2]); // 4px dash, 2px gap
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000'; 
+
+        window.pointsOfInterest.forEach((poi) => {
+          const local = window.latLonToXY(poi.lat, poi.lng);
+          const screen = window.projectToScreen(local.x, local.y);
+          ctx.beginPath();
+          ctx.arc(screen.screenX, screen.screenY, 50, 0, 2 * Math.PI);
+          ctx.stroke();
+        });
+
+        // 2) Draw and update the pulsing rings
+        ctx.setLineDash([]); // Use solid stroke for pulses (or keep dashed if desired)
+
+        const now = performance.now();
+        const newRings = [];
+
+        for (let i = 0; i < rings.length; i++) {
+          const ring = rings[i];
+          const elapsed = (now - ring.startTime) / 1000; // seconds since spawn
+
+          if (elapsed < RING_DURATION) {
+            // Progress from 0 -> 1 over the ring's lifetime
+            const t = elapsed / RING_DURATION;
+
+            // Radius can go from 0 to e.g. 80 px
+            const radius = 80 * t;
+
+            // Alpha goes from 1 -> 0
+            const alpha = 1 - t;
+
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(ring.x, ring.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.restore();
+
+            newRings.push(ring); // Keep the ring until its lifetime ends
+          }
+        }
+        rings = newRings; // Discard old rings
+      }
     }
   
-    // 3) Begin + Real Geolocation
-    function onBeginClick() {
+    function onStartBtnClick() {
       audioUnlocked = true;
-      console.log('Begin clicked; audio unlocked');
+      document.getElementById('overlay-title').style.display = 'none';
+      document.getElementById('overlay-gps-info').style.display = 'flex';
+    }
 
-      document.getElementById('overlay').style.display = 'none';
-
+    function onGPSBtnClick() {
+      document.getElementById('overlay-gps-info').style.display = 'none';
+      document.getElementById('overlay-headphones-info').style.display = 'flex';
       window.pointsOfInterest.forEach((poi) => {
-      activatePoi(poi.lat, poi.lng, poi.altitude, poi);
-      });
-      updateActivePoiList();
-
-      if ('geolocation' in navigator) {
-        // Get one initial position
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            baseLat = pos.coords.latitude;
-            baseLng = pos.coords.longitude;
-            baseAlt = pos.coords.altitude || 0;
-            // Re-run update with real + offset
-            handlePositionChange();
-          },
-          (err) => {
-            console.error('Error with geolocation:', err);
-          }
-        );
+        activatePoi(poi.lat, poi.lng, poi.altitude, poi);
+        });
+        updateActivePoiList();
   
-        // Watch for updates
-        navigator.geolocation.watchPosition(
-          (pos) => {
-            baseLat = pos.coords.latitude;
-            baseLng = pos.coords.longitude;
-            baseAlt = pos.coords.altitude || 0;
-            // Each time real GPS changes, combine with offset
-            handlePositionChange();
-          },
-          (err) => console.error('Error watching geo:', err),
-          {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 5000,
-          }
-        );
-      } else {
-        console.error('Geolocation not supported by this browser.');
-      }
-  
+        if ('geolocation' in navigator) {
+          // Get one initial position
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              baseLat = pos.coords.latitude;
+              baseLng = pos.coords.longitude;
+              baseAlt = pos.coords.altitude || 0;
+              // Re-run update with real + offset
+              handlePositionChange();
+            },
+            (err) => {
+              console.error('Error with geolocation:', err);
+            }
+          );
+    
+          // Watch for updates
+          navigator.geolocation.watchPosition(
+            (pos) => {
+              baseLat = pos.coords.latitude;
+              baseLng = pos.coords.longitude;
+              baseAlt = pos.coords.altitude || 0;
+              // Each time real GPS changes, combine with offset
+              handlePositionChange();
+            },
+            (err) => console.error('Error watching geo:', err),
+            {
+              enableHighAccuracy: true,
+              maximumAge: 0,
+              timeout: 5000,
+            }
+          );
+        } else {
+          console.error('Geolocation not supported by this browser.');
+        }
+    
       // If no geolocation, we just rely on fallback + offsets
       handlePositionChange();
     }
-  
+
+    function onHeadphonesBtnClick() {
+      document.getElementById('overlay-headphones-info').style.display = 'none';
+    }
+
     // 4) Arrow Keys => Adjust Offsets
     function onArrowKeyPress(e) {
       // 1° of latitude ~111 km. We'll pick ~0.00005 for ~5.5 m/press

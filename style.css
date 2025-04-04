@@ -1,22 +1,65 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+  
+/* 1) Make page-container a flex container that spans full height */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+} 
+
+.header {
+  display: flex;
+  justify-content: space-between; /* Title on the left, button on the right */
+  align-items: center;
+  background-color: #102c57;
+  color: #EADBC8;
+  height: 6%;
+  padding: 0px 10px;
+  border-bottom: 2px solid black; /* You can customize the thickness, style, and color */
+}
+
+.header h1 {
+  margin: 8px 0px 8px 0px
+}
+
+/* 2) Allow main content to grow and push the footer down */
+.content {
+  flex: 1;
+  /* Add your own padding/margins if needed */
+}
+
+/* 3) Normal footer styling */
+.footer {
+  /* If you just want it at the bottom of the page,
+     you don't need position: fixed. 
+     The flexbox approach ensures it's "pushed" to the bottom. */
+     background-color: #dac0a3;
+     border-top: 1px solid #102c57; /* A thin, gray line at the top */
+    padding-top: .1rem;
+    padding-bottom: .25rem;
+    text-align: center;  
+}
+
+.footer p{
+  margin: 2% 5% 2% 5%;
+}
+
   body {
+    background-color: #EADBC8;
     margin: 0;
     padding: 0;
     height: 100vh;         /* Old fallback */
     height: 100dvh;        /* Dynamic viewport height for browsers that support it */
+    font-family: 'Roboto';
   }
-
-  /* HEADER STYLES */
-#header {
-  display: flex;
-  justify-content: space-between; /* Title on the left, button on the right */
-  align-items: center;
-  background-color: #f1f1f1; /* or any color you like */
-  padding: 10px 20px;
-}
 
 /* Info button style */
 .info-button {
-  background-color: #fff;
+  background-color: #EADBC8;
   border: 2px solid #aaa;
   border-radius: 50%;
   width: 40px;
@@ -31,6 +74,7 @@
   /* Optional: small transition on hover */
   transition: background-color 0.2s;
 }
+
 .info-button:hover {
   background-color: #eee;
 }
@@ -88,31 +132,52 @@
   background: #bbb;
 }
 
-  canvas {
-    width: 100%;
-    display: block;
-  }
+canvas {
+  width: 100%;
+  display: block;
+}
 
-  #header {
-    background-color:gray;
-    height: 8%;
-    margin-bottom: 2%;
-  }
+#map {
+  margin-bottom: 2%;
+}
 
-  #map {
-    background-color:gray;
-    margin-bottom: 2%;
-  }
+.map-caption {
+  position: relative;
+}
 
-  #poi-info {
-    background-color:gray;
-    height: 40%;
-    margin-bottom: 2%;
-  }
+.map-caption p {
+  margin: .5% 3% .5% 3%;
+  font-size: .9em;
+  text-align: center;
+}
 
-  #start-experience {
-    font-size: 4em;
-  }
+.map-caption::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 10%;
+  width: 80%;
+  height: 1px;
+  background-color: black;
+}
+
+#poi-image {
+  width: 100%;
+}
+
+.poi-info {
+  margin: 2% 2% 6% 2%;
+}
+
+.poi-info h3{
+  font-size: 1.4em;
+  text-align: center;
+  margin: 4% 0% 2% 0%;
+}
+
+#start-experience {
+  font-size: 8em;
+}
 
   /* Overlay - initially visible on page load */
 .overlay {
@@ -124,15 +189,19 @@
   display: flex;             /* Visible on page load, using flex to center content */
   justify-content: center;   
   align-items: center;       
-  background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+  background-color: rgba(0, 0, 0, 0.75); /* Dim background */
 }
 
 /* Overlay content box styling */
 .overlay-content {
-  background-color: #fff;
+  background-color: #eadbc6;
   padding: 20px;
   border-radius: 8px;
   width: 80%;
   height: 80%;
   text-align: center;
+}
+
+.debug {
+  display: none;
 }

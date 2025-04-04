@@ -2,16 +2,19 @@
 // Holds pointsOfInterest array and any data definitions
 const pointsOfInterest = [
     {
-      name: "Point 1",
+      name: "Point of Interest 1 Name",
       lat: 38.048985,
       lng: -84.500100,
       radius: 50,
       audioPath: "audio/piano.mp3",
       imagePath: "images/image-1.jpg",
-      textContent: "Point 1 (intersection of Main and Broadway).",
+      textContent: "Point 1 (intersection of Main and Broadway). Lorem ipsum dolor sit amet, consectetur adipiscing elit. \
+        Vestibulum sagittis ac orci sit amet sagittis. Maecenas cursus, sem at volutpat finibus, magna dui cursus velit, \
+        in pharetra turpis tellus ac nunc. Curabitur sit amet tortor sodales, tincidunt lectus id, sodales ante. Maecenas \
+        ligula arcu, aliquet eget nulla sit amet, mollis feugiat quam. Mauris ullamcorper ipsum ac orci lacinia aliquet. ",
     },
     {
-      name: "Point 2",
+      name: "Point of Interest 2 Name",
       lat: 38.049557,
       lng: -84.500829,
       radius: 50,
