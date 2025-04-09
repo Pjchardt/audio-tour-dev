@@ -1,4 +1,6 @@
 // main.js
+window.debug = true;  
+
 (function () {
     // 1) Global/state variables
     // Real GPS data (updated by geolocation)
@@ -54,6 +56,45 @@
 
       // Grab canvas
       const canvas = document.getElementById('myMap');
+
+      // Only register click events if debug mode is enabled
+      if (debug) {
+        canvas.addEventListener('touchstart', (evt) => {
+          const rect = canvas.getBoundingClientRect();
+          // touches[0] for a single-finger touch
+          const screenX = (evt.touches[0].clientX - rect.left) * (canvas.width  / rect.width);
+          const screenY = (evt.touches[0].clientY - rect.top)  * (canvas.height / rect.height);
+
+          // 1. convert to geographic coordinates
+          const { lat: clickLat, lon: clickLon } = screenToLatLon(screenX, screenY);
+
+          // 2. figure out what the *new* offsets should be
+          const newOffsetLat = clickLat - baseLat;
+          const newOffsetLng = clickLon - baseLng;
+
+          // 3. smoothly animate to them
+          cancelTween();                    // stop any existing motion
+          tweenOffsets(newOffsetLat, newOffsetLng);
+        });
+  
+        canvas.addEventListener('click', (evt) => {
+          const rect = canvas.getBoundingClientRect();
+          const screenX = (evt.clientX - rect.left) * (canvas.width  / rect.width);
+          const screenY = (evt.clientY - rect.top)  * (canvas.height / rect.height);
+
+          // 1. convert to geographic coordinates
+          const { lat: clickLat, lon: clickLon } = screenToLatLon(screenX, screenY);
+
+          // 2. figure out what the *new* offsets should be
+          const newOffsetLat = clickLat - baseLat;
+          const newOffsetLng = clickLon - baseLng;
+
+          // 3. smoothly animate to them
+          cancelTween();                    // stop any existing motion
+          tweenOffsets(newOffsetLat, newOffsetLng);
+        });
+      }
+
       ctx = canvas.getContext('2d');
 
       // Set the fill color
@@ -261,12 +302,12 @@
       const effectiveLng = baseLng + offsetLng;
       const effectiveAlt = baseAlt + offsetAlt; // if you use altitude offsets
   
-      console.log(
+      /*console.log(
         `Effective lat/lng/alt: ${effectiveLat}, ${effectiveLng}, ${effectiveAlt}`
-      );
+      );*/
   
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
-      handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
+      //handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
 
       // Convert to XY and then to screen coordinates
       const local = window.latLonToXY(effectiveLat, effectiveLng);
@@ -294,7 +335,7 @@
   
     function activatePoi(latUser, lngUser, altUser, poi) {
       
-      console.log(`Activating POI: ${poi.name}`);
+      //console.log(`Activating POI: ${poi.name}`);
       let howlInstance = null;
   
       if (audioUnlocked) {
@@ -322,7 +363,7 @@
   
     function deactivatePoi(poi) {
       if (!activePoiMap[poi.name]) return;
-      console.log(`Deactivating POI: ${poi.name}`);
+      //console.log(`Deactivating POI: ${poi.name}`);
       const { howlInstance } = activePoiMap[poi.name];
       if (howlInstance) {
         howlInstance.stop();
@@ -394,6 +435,48 @@
           poiTextElem.textContent = closestPoi.textContent;
         }
       }
+
+      // ---------------------------------------------
+// simple tween engine for offsetLat / offsetLng
+// ---------------------------------------------
+const DURATION_MS = 3000;                // total time of the move
+const easeInOut = t => t < 0.5          // nice smooth S‑curve
+  ? 2*t*t
+  : 1 - Math.pow(-2*t + 2, 2) / 2;
+
+let tweenActive = false;
+
+function tweenOffsets(toLat, toLng) {
+  const startLat = offsetLat;
+  const startLng = offsetLng;
+  const deltaLat = toLat - startLat;
+  const deltaLng = toLng - startLng;
+
+  const startTime = performance.now();
+  tweenActive = true;
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / DURATION_MS);
+    const k = easeInOut(t);
+
+    offsetLat = startLat + deltaLat * k;
+  offsetLng = startLng + deltaLng * k;
+
+    handlePositionChange();   // redraw / update Howler, etc.
+
+    if (t < 1 && tweenActive) {
+      requestAnimationFrame(step);
+    } else {
+      tweenActive = false;    // finished
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+/* Optional: stop any current tween immediately */
+function cancelTween() { tweenActive = false; }
   
     // 8) Start
     document.addEventListener('DOMContentLoaded', init);
