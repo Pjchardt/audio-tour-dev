@@ -307,7 +307,7 @@ window.debug = true;
       );*/
   
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
-      //handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
+      handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
 
       // Convert to XY and then to screen coordinates
       const local = window.latLonToXY(effectiveLat, effectiveLng);
@@ -322,14 +322,14 @@ window.debug = true;
   
     // 6) Activate/Deactivate POIs
     function handleLocationUpdate(latUser, lngUser, altUser) {
-      window.pointsOfInterest.forEach((poi) => {
+      /*window.pointsOfInterest.forEach((poi) => {
         const dist = window.haversineDistance(latUser, lngUser, poi.lat, poi.lng);
         if (dist <= poi.radius) {
           activatePoi(latUser, lngUser, altUser, poi);
         } else {
           deactivatePoi(poi);
         }
-      });
+      });*/
       updateActivePoiList();
     }
   
@@ -410,7 +410,7 @@ window.debug = true;
           const distance = haversineDistance(effectiveLat, effectiveLng, poi.lat, poi.lng);
 
           // -- Update the closest POI logic --
-          if (distance < minDist) {
+          if (distance < minDist && poi.isFocusable === true) {
             minDist = distance;
             closestPoi = poi; // store the entire POI object
           }
