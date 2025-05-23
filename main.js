@@ -2,31 +2,34 @@
 window.debug = true;  
 
 (function () {
-    // 1) Global/state variables
+    // Global/state variables
     // Real GPS data (updated by geolocation)
     let baseLat = 0;   // fallback defaults
     let baseLng = 0;
     let baseAlt = 0;
   
-    // Offsets added via arrow keys
+    // Offsets added via arrow keys or mouse/touch press
     let offsetLat = 0;
     let offsetLng = 0;
     let offsetAlt = 0; // if you want altitude offsets
   
-    // For multiple POIs: activePoiMap = { [poi.name]: { poi, howlInstance } }
     let activePoiMap = {};
     let audioUnlocked = false;
 
-    var ctx;
+    var ctx, canvas;
+    var rings;
+    const RING_DURATION = 3.0;
 
-    // 2) Initialization
+    // Initialization
     function init() {
       document.getElementById('start-experience-btn').addEventListener('click', onStartBtnClick);
       document.getElementById('gps-continue-btn').addEventListener('click', onGPSBtnClick);
       document.getElementById('headphones-continue-btn').addEventListener('click', onHeadphonesBtnClick);
 
-      // Listen for arrow keys to adjust offset, not the base lat/lng
-      document.addEventListener('keydown', onArrowKeyPress);
+      // Listen for arrow keys to adjust offset, not the base lat/lng, if in debug mode
+      if (debug === true) {
+        document.addEventListener('keydown', onArrowKeyPress);
+      }
   
       // Get references to elements
       const infoButton = document.getElementById('infoButton');
@@ -50,15 +53,14 @@ window.debug = true;
         }
       });
 
-
       // Update the UI initially
       updateLatLngDisplay();
 
       // Grab canvas
-      const canvas = document.getElementById('myMap');
+      canvas = document.getElementById('myMap');
 
       // Only register click events if debug mode is enabled
-      if (debug) {
+      if (debug === true) {
         canvas.addEventListener('touchstart', (evt) => {
           const rect = canvas.getBoundingClientRect();
           // touches[0] for a single-finger touch
@@ -97,67 +99,43 @@ window.debug = true;
 
       ctx = canvas.getContext('2d');
 
-      // Set the fill color
-      ctx.fillStyle = '#323232';
-      // Fill the entire canvas with the color
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = 70;
 
-      // Draw our anchor point
-      ctx.beginPath();
-      const local = window.latLonToXY(window.lat0, window.lon0);
-      const screen = window.projectToScreen(local.x, local.y);
-      ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = 'blue';
-      ctx.fill();
+      clearBackground();
+      drawPOI();
 
-      // Optional: set stroke style (color and line width)
       ctx.strokeStyle = 'rgb(200, 200, 200)';      // outline color
       ctx.lineWidth = 5;            // thickness of outline
 
       // Example dash pattern (4px dash, 2px gap, etc.)
       ctx.setLineDash([20, 20]);
 
-      // Convert to XY and then to screen coordinates
-      window.pointsOfInterest.forEach((poi) => {
-        const local = window.latLonToXY(poi.lat, poi.lng);
-        const screen = window.projectToScreen(local.x, local.y);
-        ctx.beginPath();
-        ctx.arc(screen.screenX, screen.screenY, 50, 0, 2 * Math.PI);
-        ctx.stroke();
-      });
-
       ctx.setLineDash([]);  // empty array = no dash
       ctx.restore(); // back to normal
 
       // We'll store "rings" in an array
-      let rings = [];
-
-      // How long (in seconds) each ring lasts
-      const RING_DURATION = 1.0;
-
+      rings = [];
       // Every second, spawn a new ring at each point of interest
       setInterval(() => {
-        window.pointsOfInterest.forEach((poi) => {
-          const local = window.latLonToXY(poi.lat, poi.lng);
-          const screen = window.projectToScreen(local.x, local.y);
-
-          rings.push({
-            x: screen.screenX,
-            y: screen.screenY,
-            startTime: performance.now(),
-          });
+        const effectiveLat = baseLat + offsetLat;
+        const effectiveLng = baseLng + offsetLng;
+        const local = window.latLonToXY(effectiveLat, effectiveLng);
+        const screen = window.projectToScreen(local.x, local.y);
+        rings.push({
+          x: screen.screenX,
+          y: screen.screenY,
+          startTime: performance.now(),
         });
-      }, 1000);
+      }, 3000);
 
       // Main animation loop
       function animate() {
         requestAnimationFrame(animate);
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        clearBackground();
+        drawPOI();
 
         // 1) Draw the dotted circles (your existing code)
         ctx.setLineDash([4, 2]); // 4px dash, 2px gap
@@ -172,7 +150,10 @@ window.debug = true;
           ctx.stroke();
         });
 
-        // 2) Draw and update the pulsing rings
+        drawPlayer();
+
+        /*
+        // Draw and update the pulsing rings
         ctx.setLineDash([]); // Use solid stroke for pulses (or keep dashed if desired)
 
         const now = performance.now();
@@ -202,10 +183,88 @@ window.debug = true;
             newRings.push(ring); // Keep the ring until its lifetime ends
           }
         }
-        rings = newRings; // Discard old rings
+        rings = newRings; // Discard old rings */
       }
+
+      animate();
     }
   
+    function clearBackground() {
+      // Set the fill color
+      ctx.fillStyle = '#323232';
+      // Fill the entire canvas with the color
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (debug === true) {
+        // Draw our anchor point
+        ctx.beginPath();
+        const local = window.latLonToXY(window.lat0, window.lon0);
+        const screen = window.projectToScreen(local.x, local.y);
+        ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+      }
+    }
+
+    function drawPOI() {
+      // Convert to XY and then to screen coordinates
+      window.pointsOfInterest.forEach((poi) => {
+        const local = window.latLonToXY(poi.lat, poi.lng);
+        const screen = window.projectToScreen(local.x, local.y);
+        ctx.strokeStyle = (poi.isFocusable === true) ? 'rgb(200, 200, 200)' : 'rgb(182, 138, 102)';      // outline color
+        ctx.beginPath();
+        ctx.arc(screen.screenX, screen.screenY, 50, 0, 2 * Math.PI);
+        ctx.stroke();
+      });
+    }
+
+    function drawPlayer() {
+      const effectiveLat = baseLat + offsetLat;
+      const effectiveLng = baseLng + offsetLng;
+      const effectiveAlt = baseAlt + offsetAlt; // if you use altitude offsets
+
+      // Convert to XY and then to screen coordinates
+      const local = window.latLonToXY(effectiveLat, effectiveLng);
+      const screen = window.projectToScreen(local.x, local.y);
+      ctx.beginPath();
+      ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
+      ctx.fillStyle = 'purple';
+      ctx.fill();
+
+      // 2) Draw and update the pulsing rings
+      ctx.setLineDash([]); // Use solid stroke for pulses (or keep dashed if desired)
+
+      const now = performance.now();
+      const newRings = [];
+
+      for (let i = 0; i < rings.length; i++) {
+        const ring = rings[i];
+        const elapsed = (now - ring.startTime) / 1000; // seconds since spawn
+
+        if (elapsed < RING_DURATION) {
+          // Progress from 0 -> 1 over the ring's lifetime
+          const t = elapsed / RING_DURATION;
+
+          // Radius can go from 0 to e.g. 80 px
+          const radius = 80 * t;
+
+          // Alpha goes from 1 -> 0
+          const alpha = 1 - t;
+
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = 'purple';
+          ctx.beginPath();
+          ctx.arc(screen.screenX, screen.screenY, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+          ctx.restore();
+
+          newRings.push(ring); // Keep the ring until its lifetime ends
+        }
+      }
+      rings = newRings; // Discard old rings
+    }
+
     function onStartBtnClick() {
       audioUnlocked = true;
       document.getElementById('overlay-title').style.display = 'none';
@@ -309,55 +368,28 @@ window.debug = true;
       updateLatLngDisplay(effectiveLat, effectiveLng, effectiveAlt);
       handleLocationUpdate(effectiveLat, effectiveLng, effectiveAlt);
 
-      // Convert to XY and then to screen coordinates
       const local = window.latLonToXY(effectiveLat, effectiveLng);
       const screen = window.projectToScreen(local.x, local.y);
-      ctx.beginPath();
-      ctx.arc(screen.screenX, screen.screenY, 5, 0, 2 * Math.PI);
-      ctx.fillStyle = 'purple';
-      ctx.fill();
 
       Howler.pos(local.x, 0, local.y);
     }
   
-    // 6) Activate/Deactivate POIs
+    // Activate/Deactivate POIs
     function handleLocationUpdate(latUser, lngUser, altUser) {
-      /*window.pointsOfInterest.forEach((poi) => {
-        const dist = window.haversineDistance(latUser, lngUser, poi.lat, poi.lng);
-        if (dist <= poi.radius) {
-          activatePoi(latUser, lngUser, altUser, poi);
-        } else {
-          deactivatePoi(poi);
-        }
-      });*/
+      // TOD: If 12 simult audio tracks is too much, enable/disable here based off of distance
       updateActivePoiList();
     }
   
     function activatePoi(latUser, lngUser, altUser, poi) {
-      
-      //console.log(`Activating POI: ${poi.name}`);
       let howlInstance = null;
-  
       if (audioUnlocked) {
         howlInstance = window.createSpatialSound(poi.audioPath);
         howlInstance.on('load', () => {
-          console.log(`Loaded sound for ${poi.name}`);
-          /*const { x, y, z } = window.localCoordsYUp(
-            latUser,
-            lngUser,
-            altUser,
-            poi.lat,
-            poi.lng,
-            poi.altitude
-          );
-          howlInstance.pos(x, y, z);*/
-  
           const local = window.latLonToXY(poi.lat, poi.lng);
           howlInstance.pos(local.x, 0, local.y);
           howlInstance.play();
         });
       }
-  
       activePoiMap[poi.name] = { poi, howlInstance };
     }
   
